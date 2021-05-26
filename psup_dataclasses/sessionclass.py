@@ -1,6 +1,6 @@
-from psup_dataclasses import *
-from PySide6.QtCore import QDateTime, Qt
+from datetime import datetime
 
+from psup_dataclasses import *
 from constants import *
 
 class Session:
@@ -52,7 +52,7 @@ class Session:
             if raw_event:
                 self.event_lines_read += 1
                 date, name, event_type, place = raw_event.split(",")
-                date = QDateTime.fromString(date, Qt.DateFormat.ISODate)
+                date = datetime.fromisoformat(date)
 
                 if name in self.courses:
                     course = self.courses[name]
