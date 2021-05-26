@@ -6,8 +6,10 @@ import sys
 import os
 from dotenv import load_dotenv
 import shutil
+from datetime import datetime
+import matplotlib.pyplot as plt
 
-from dataclasses import *
+from psup_dataclasses import *
 
 intents = discord.Intents.all()
 intents.members = True
@@ -22,6 +24,29 @@ def get_session(user_id):
     session = Session(course_file_name, event_file_name)
     session.read()
     return session
+
+
+def get_plot(user_id, courses):
+    # x axis values
+    x = [1, 2, 3]
+    # corresponding y axis values
+    y = [2, 4, 1]
+
+    # plotting the points
+    plt.plot(x, y)
+
+    # naming the x axis
+    plt.xlabel('x - axis')
+    # naming the y axis
+    plt.ylabel('y - axis')
+
+    # giving a title to my graph
+    plt.title('My first graph!')
+    plt_file_name = "datas/"+str(user_id)+"/plot.png"
+    # function to show the plot
+    plt.savefig(plt_file_name)
+
+    return plt_file_name
 
 # detecter l'allumage du bot
 @bot.event
@@ -81,6 +106,53 @@ async def add_course(ctx, course_name, places_available, previous_last_entry):
     else:
         await ctx.channel.send(course_name+" existe déjà")
 
+
+@bot.command()
+async def add_event(ctx, course_name, date, event_type, place=-1):
+    # TODO : Split the entries in separate messages
+    user_id = ctx.author.id
+    user_session = get_session(user_id)
+    course = user_session.courses[course_name]
+    date = datetime.fromisoformat(date)
+    place = int(place)
+    if event_type == "Waiting":
+        new_event = WaitingListEvent(date, course, place)
+        course.add_event(new_event)
+    else:
+        new_event = all_event_kinds[event_type](date, course)
+        course.add_event(new_event)
+
+    with open("datas/"+str(user_id)+"/events.csv", 'a') as events_file:
+        events_file.write(str(new_event)+"\n")
+    await ctx.channel.send("Le nouvel évènement a été ajouté avec succès")
+
+
+@bot.command()
+async def my_files(ctx):
+    user_id = ctx.author.id
+    courses_file = "datas/"+str(user_id)+"/courses.csv"
+    events_file ="datas/"+str(user_id)+"/events.csv"
+    await ctx.channel.send("The courses file :", file=discord.File(courses_file, filename=ctx.author.name+"courses.csv"))
+    await ctx.channel.send("The events file :", file=discord.File(events_file, filename=ctx.author.name+"events.csv"))
+
+
+@bot.command()
+async def plot(ctx, *courses):
+    user_id = ctx.author.id
+    user_session =get_session(user_id)
+    courses = list(courses)
+    if not courses:
+        courses = list(user_session.courses.values())
+    else:
+        for i in range(len(courses)):
+            if courses[i] in user_session.courses:
+                courses[i] = user_session.courses[courses[i]]
+            else:
+                await ctx.channel.send(courses[i]+" n'a pas été trouvé")
+                courses[i] = None
+    plot_file_name = get_plot(user_id, courses)
+
+    await ctx.channel.send(file=discord.File(plot_file_name))
 
 load_dotenv()
 token = os.getenv('PSUP-BOT-TOKEN')

@@ -12,7 +12,7 @@ class Event:
         self.course = course
 
     def __str__(self):
-        return ",".join([self.date.toString(Qt.DateFormat.ISODate), str(self.course.name)])
+        return ",".join([self.date.isoformat(sep=" "), str(self.course.name)])
 
 
 class AcceptEvent(Event):

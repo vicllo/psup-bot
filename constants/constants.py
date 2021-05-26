@@ -1,4 +1,4 @@
-from dataclasses import *
+from psup_dataclasses import *
 
 all_event_kinds = {"Accepted": AcceptEvent,
                    "UserRefused": UserRefuseEvent,

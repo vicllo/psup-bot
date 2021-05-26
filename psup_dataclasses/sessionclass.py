@@ -1,4 +1,4 @@
-from dataclasses import *
+from psup_dataclasses import *
 from PySide6.QtCore import QDateTime, Qt
 
 from constants import *
