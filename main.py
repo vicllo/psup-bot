@@ -179,9 +179,6 @@ async def get_place(ctx):
 async def on_ready():
     print("Successfully connected !")
     await bot.change_presence(status=discord.Status.online, activity=discord.Game(".help"))
-    serv = bot.get_guild(748924322734932078)
-    canal = serv.get_channel(748924322734932082)
-    #await canal.send("Salut Martin")
 
 
 #commande test
@@ -381,6 +378,8 @@ async def upload(ctx):
         confirmation = await bot.wait_for('message', check=check)
         if len(confirmation.attachments) == 1:
             await confirmation.attachments[0].save("datas/" + str(user_id) + "/events.csv")
+    else:
+        await ctx.channel.send("Command canceled")
 
 
 load_dotenv()
