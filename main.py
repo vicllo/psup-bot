@@ -52,7 +52,10 @@ def get_plot(user_id, courses):
     plt.ylabel('Place')
     xfmt = mdates.DateFormatter('%d-%m-%y %H:%M')
     ax.xaxis.set_major_formatter(xfmt)
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(1))
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(2))
+
+    y_min, y_max = plt.ylim()
+    ax.set_ylim(0, y_max)
 
     ax.legend()
     # giving a title to my graph
@@ -352,6 +355,33 @@ async def plot(ctx, *courses):
 
     await ctx.channel.send(file=discord.File(plot_file_name))
     os.remove(plot_file_name)
+
+
+@bot.command()
+async def upload(ctx):
+    def check(m):
+        return m.author.id == user_id
+    user_id = ctx.author.id
+    await ctx.channel.send("You are about to upload your own files.\n "
+                           "Please consider checking them so that they have no errors.\n"
+                           "This command will result on the suppresion of your old files. "
+                           "If you want to downloaw them, please type .myfiles\n"
+                           "If you agree with this, type \"yes\"")
+
+    confirmation = await bot.wait_for('message', check=check)
+    if confirmation.content == "yes":
+        await ctx.channel.send("Send the courses file")
+
+        confirmation = await bot.wait_for('message', check=check)
+        if len(confirmation.attachments) == 1:
+            await confirmation.attachments[0].save("datas/"+str(user_id)+"/courses.csv")
+
+        await ctx.channel.send("Send the events file")
+
+        confirmation = await bot.wait_for('message', check=check)
+        if len(confirmation.attachments) == 1:
+            await confirmation.attachments[0].save("datas/" + str(user_id) + "/events.csv")
+
 
 load_dotenv()
 token = os.getenv('PSUP-BOT-TOKEN')
